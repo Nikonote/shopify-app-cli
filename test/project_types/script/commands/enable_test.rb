@@ -39,6 +39,7 @@ module Script
       private
 
       def perform_command
+        ShopifyCli::PartnersAPI.expects(:authenticate).with(@context)
         run_cmd("enable --api_key=#{@api_key} --shop_domain=#{@shop_domain}")
       end
     end

@@ -9,6 +9,8 @@ module Script
       end
 
       def call(args, _name)
+        ShopifyCli::PartnersAPI.authenticate(@ctx)
+
         form = Forms::Deploy.ask(@ctx, args, options.flags)
         project = ScriptProject.current
 

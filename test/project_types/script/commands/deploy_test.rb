@@ -30,7 +30,6 @@ module Script
           extension_point_type: @ep_type,
           force: @force
         )
-
         @context
           .expects(:puts)
           .with(@context.message('script.deploy.script_deployed', api_key: @api_key))
@@ -46,6 +45,7 @@ module Script
       private
 
       def perform_command
+        ShopifyCli::PartnersAPI.expects(:authenticate).with(@context)
         run_cmd("deploy --api_key=#{@api_key} --force")
       end
     end

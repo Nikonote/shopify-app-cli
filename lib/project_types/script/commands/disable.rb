@@ -9,6 +9,8 @@ module Script
       end
 
       def call(args, _name)
+        ShopifyCli::PartnersAPI.authenticate(@ctx)
+
         form = Forms::Enable.ask(@ctx, args, options.flags)
         return @ctx.puts(self.class.help) unless form
 

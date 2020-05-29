@@ -50,6 +50,16 @@ module ShopifyCli
         end
       end
 
+      def authenticate(ctx)
+        OAuth.new(
+          ctx: ctx,
+          service: 'identity',
+          client_id: cli_id,
+          scopes: 'openid https://api.shopify.com/auth/partners.app.cli.access',
+          request_exchange: partners_id,
+        ).authenticate("#{auth_endpoint}/oauth")
+      end
+
       private
 
       def authenticated_req(ctx)
@@ -74,16 +84,6 @@ module ShopifyCli
           authenticate(ctx)
           ShopifyCli::DB.get(:identity_exchange_token)
         end
-      end
-
-      def authenticate(ctx)
-        OAuth.new(
-          ctx: ctx,
-          service: 'identity',
-          client_id: cli_id,
-          scopes: 'openid https://api.shopify.com/auth/partners.app.cli.access',
-          request_exchange: partners_id,
-        ).authenticate("#{auth_endpoint}/oauth")
       end
 
       def partners_id
