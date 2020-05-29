@@ -12,6 +12,7 @@ module Rails
         assert_equal(form.title, 'Test App')
         assert_equal(form.organization_id, 42)
         assert_equal(form.shop_domain, 'shop.myshopify.com')
+        assert_equal(form.db, 'sqlite3')
       end
 
       def test_title_can_be_provided_by_flag
@@ -36,6 +37,51 @@ module Rails
       def test_type_is_prompted
         CLI::UI::Prompt.expects(:ask).with('What type of app are you building?').returns('public')
         ask(type: nil)
+      end
+
+      def test_db_can_be_provided_by_flag
+        form = ask(db: 'sqlite3')
+        assert_equal(form.db, 'sqlite3')
+      end
+
+      def test_db_is_validated
+        io = capture_io do
+          form = ask(db: "not_a_db")
+          assert_nil(form)
+        end
+        assert_match('Invalid Database Type not_a_db', io.join)
+      end
+
+      def test_user_can_change_db_in_app
+        CLI::UI::Prompt.expects(:confirm)
+          .with(<<~SELECT,
+            Would you like to select your database now?
+            If you want to change this in the future, run {{command:db:system:change --to=[new_db_type]}}
+            ({{underline:https://gorails.com/episodes/rails-6-db-system-change-command}})
+          SELECT
+                default: false)
+          .returns(true)
+        CLI::UI::Prompt.expects(:ask)
+          .with("What database type would you like to use? Please ensure the database is installed.")
+          .returns('mysql')
+        form = ask(db: nil)
+        assert_equal(form.db, 'mysql')
+      end
+
+      def test_user_asked_if_they_want_to_change_db
+        CLI::UI::Prompt.expects(:confirm)
+          .with(<<~SELECT,
+            Would you like to select your database now?
+            If you want to change this in the future, run {{command:db:system:change --to=[new_db_type]}}
+            ({{underline:https://gorails.com/episodes/rails-6-db-system-change-command}})
+          SELECT
+                default: false)
+          .returns(false)
+        CLI::UI::Prompt.expects(:ask)
+          .with("What database type would you like to use? Please ensure the database is installed.")
+          .never
+        form = ask(db: nil)
+        assert_equal(form.db, 'sqlite3')
       end
 
       def test_user_will_be_prompted_if_more_than_one_organization
@@ -210,7 +256,7 @@ module Rails
 
       private
 
-      def ask(title: 'Test App', org_id: 42, shop: 'shop.myshopify.com', type: 'custom')
+      def ask(title: 'Test App', org_id: 42, shop: 'shop.myshopify.com', type: 'custom', db: 'sqlite3')
         Create.ask(
           @context,
           [],
@@ -218,6 +264,7 @@ module Rails
           type: type,
           organization_id: org_id,
           shop_domain: shop,
+          db: db,
         )
       end
     end
