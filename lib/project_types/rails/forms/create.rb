@@ -114,7 +114,7 @@ module Rails
         unless VALID_DB_TYPES.include?(db)
           ctx.abort(ctx.message('rails.forms.create.error.invalid_db_type', db))
         end
-        ctx.puts(ctx.message('rails.forms.create.db.type.selected', db))
+        ctx.puts(ctx.message('rails.forms.create.db.selected', db))
         db
       end
     end
