@@ -17,6 +17,8 @@ module Script
           return @ctx.puts(self.class.help)
         end
 
+        cur_dir = Dir.pwd
+
         script = Layers::Application::CreateScript.call(
           ctx: @ctx,
           language: language,
@@ -26,6 +28,7 @@ module Script
         @ctx.puts(@ctx.message('script.create.changed_dir', folder: script.name))
         @ctx.puts(@ctx.message('script.create.script_created', script_id: script.id))
       rescue StandardError => e
+        cleanup(form.name, cur_dir)
         UI::ErrorHandler.pretty_print_and_raise(e, failed_op: @ctx.message('script.create.error.operation_failed'))
       end
 
@@ -33,7 +36,15 @@ module Script
         allowed_values = Script::Layers::Application::ExtensionPoints.types.map { |type| "{{cyan:#{type}}}" }
         ShopifyCli::Context.message('script.create.help', ShopifyCli::TOOL_NAME, allowed_values.join(', '))
       end
+
+      private 
+
+      def cleanup(script_name, cli_dir)
+        Dir.chdir(cli_dir)
+        FileUtils.rm_rf(script_name)
+      end
     end
   end
 end
+
 
