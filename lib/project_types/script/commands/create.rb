@@ -10,6 +10,8 @@ module Script
 
       def call(args, _name)
         language = 'ts'
+        cur_dir = Dir.pwd
+
         form = Forms::Create.ask(@ctx, args, options.flags)
         return @ctx.puts(self.class.help) if form.nil?
 
@@ -26,12 +28,18 @@ module Script
         @ctx.puts(@ctx.message('script.create.changed_dir', folder: script.name))
         @ctx.puts(@ctx.message('script.create.script_created', script_id: script.id))
       rescue StandardError => e
+        self.class.cleanup(script_name: form.name, cli_dir: cur_dir)
         UI::ErrorHandler.pretty_print_and_raise(e, failed_op: @ctx.message('script.create.error.operation_failed'))
       end
 
       def self.help
         allowed_values = Script::Layers::Application::ExtensionPoints.types.map { |type| "{{cyan:#{type}}}" }
         ShopifyCli::Context.message('script.create.help', ShopifyCli::TOOL_NAME, allowed_values.join(', '))
+      end
+
+      def self.cleanup(script_name:, cli_dir:)
+        Dir.chdir(cli_dir)
+        FileUtils.rm_rf(script_name) if Dir.exist?(script_name)
       end
     end
   end
