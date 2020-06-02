@@ -90,6 +90,7 @@ module Script
           Build the script and deploy it to app.
             Usage: {{command:%s deploy --API_key=<API_key> [--force]}}
           HELP
+          # extended_help: 
 
           error: {
             operation_failed: "Script not deployed.",
